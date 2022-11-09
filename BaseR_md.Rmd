@@ -1,0 +1,133 @@
+---
+title: "baseR_md"
+author: "Lawrence"
+date: "2022-11-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Descriptive statistics
+```{r}
+getwd()
+```
+
+## Load to an object called
+```{r}
+readRDS("my_day2matrix.rds")
+
+new <- readRDS("my_day2matrix.rds")
+
+new
+```
+
+##  Add row sums and means
+```{r}
+new_1 <- cbind(new, rowSums = rowSums(new), rowMeans = rowMeans(new))
+
+new_1
+```
+
+##  Load the ToothGrowth
+```{r}
+data("ToothGrowth")
+```
+## find more information on this dataset
+
+```{r}
+head(ToothGrowth)
+col(ToothGrowth)
+dim(ToothGrowth)
+summary(ToothGrowth)
+```
+## mean of tooth length?
+
+```{r}
+mean(ToothGrowth $len)
+mean(ToothGrowth [,1])
+```
+## maximum and minimum of the teeth length?
+
+```{r}
+max(ToothGrowth [,1])
+min(ToothGrowth $len)
+```
+## Can you calculate rowSums and rowMeans on this data
+
+```{r}
+cbind(ToothGrowth, rowSums = rowSums(ToothGrowth), rowMeans(ToothGrowth))
+## this code will not produce an output because it contains some string characters
+```
+
+## Custom function
+```{r}
+hypotenuse <- function (x, z) {hypo <- sqrt(x**2 + z**2)^0.5
+return(hypo)}
+```
+
+
+```{r}
+hypotenuse(5,6)
+```
+## Apply function on a matrix
+## Sapply and lapply
+
+```{r}
+x <- c(1:10)
+
+square <- function(y){
+sq=y^2
+return(sq)
+}
+
+square(5)
+```
+## lapply
+```{r}
+lapply(x, square)
+```
+## sapply
+```{r}
+sapply(x, square)
+```
+
+## Listing both numeric and logical vectors
+
+```{r}
+new_list <- list(x, vector1, seq(from = 10, to = 18, by = 2), c(T, T, F, T, F))
+
+sapply(new_list, sum)
+lapply(new_list, sum)
+
+```
+## Repeat each element using sapply
+
+```{r}
+sapply(new_list, rep, each = 3)
+```
+
+
+
+
