@@ -106,7 +106,7 @@ plot3 <- ggplot(diamonds, aes(x = carat, y = price)) +
 plot4 <- ggplot(diamonds, aes(x = carat, y = price)) +
   geom_smooth()
 ```
-## combine plots
+## combine plot
 ```{r}
 cowplot::plot_grid(plot1, plot2, plot3, plot4)
 ```
