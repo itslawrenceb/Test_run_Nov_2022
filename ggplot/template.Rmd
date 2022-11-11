@@ -347,16 +347,11 @@ Using `cowplot`.
 
 ```{r, fig.height=12, fig.width=12}
 library(cowplot)
-first_row <- cowplot::plot_grid(
-  
-  
+first_row <- cowplot::plot_grid(obds_diamonds, obds_chickweight, nrow = 1
 )
-second_row <- cowplot::plot_grid(
-  
+second_row <- cowplot::plot_grid(obds_msleep, nrow = 1
 )
-super_plot <- cowplot::plot_grid(
-  
-  
+super_plot <- cowplot::plot_grid(first_row, second_row, labels = c("A", "B"), ncol = 2, nrow = 1
 )
 super_plot
 ```
@@ -384,7 +379,7 @@ library(gridExtra)
 You will likely need a few attempts to fine-tune the width and height of the output file.
 
 ```{r}
-ggsave(   )
+ggsave("new_plot.jpeg", plot = super_plot, width = 12, height = 12)
 ```
 
 # Exercise
@@ -394,8 +389,8 @@ ggsave(   )
 - Explore the data set `ggplot2::mpg` and generate the most informative plot that you can!
 
 ```{r}
-
-
-
-
+ggplot(mpg, aes(cty, hwy, color = year)) +
+  geom_abline(slope = 1, intercept = 0) +
+  geom_point(size = 0.5) +
+  facet_wrap(~manufacturer)
 ```
