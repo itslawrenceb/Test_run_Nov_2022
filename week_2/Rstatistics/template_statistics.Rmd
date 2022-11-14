@@ -130,7 +130,9 @@ plot(seq(0,1, 0.01), Qb)
 - Plot the density function in the range $[-5, 5]$ in 0.1 increment.
 
 ```{r}
-
+Db <- dnorm(seq(-5, 5, 0.1))
+Db
+plot(seq(-5,5, 0.1), Db)
 
 
 ```
@@ -138,18 +140,22 @@ plot(seq(0,1, 0.01), Qb)
 - What is the probability of observing a value greater than 2?
 
 ```{r}
-
+prb <- pnorm(1 -(pnorm (2)))
+prb
 ```
 
 - What is the probability of observing a value between -2 and 2?
 
 ```{r}
+pnorm(2) -pnorm (-2)
 
 ```
 
 - What is the probability of observing a value more extreme than -2 or 2?
 
 ```{r}
+1 - (pnorm(2) -pnorm (-2))
+
 
 ```
 
@@ -596,7 +602,10 @@ cat(sprintf("There are %i bonferonni corrected p-values smaller than 0.05", sum(
 - Run a Wilcoxon test to compare the vectors `1:10` and `5:14`.
 
 ```{r}
-wilcox.test(x = 1:10, y = 5:14)
+b <- c(x = 1:10, y = 5:14)
+b_out <- wilcox.test (b)
+print (b_out)
+str(b_out)
 ```
 
 **What is the p-value?**
@@ -609,7 +618,7 @@ wilcox.test(x = 1:10, y = 5:14)
 - Import the data in the file `gene_exprs.csv`.
 
 ```{r}
-df <- read.csv(   )
+df <- read.csv(  "gene_exprs.csv" )
 df
 ```
 
@@ -617,13 +626,24 @@ df
 - Run a t-test to compare the gene expression values between the two groups.
 
 ```{r}
-t.test(   )
+t.test(gene_exprs ~ group, df   )
+
 ```
 
 **What is the p-value?**
 
 > Answer:
 > 
+
+
+## another_route_to_the_solution
+```{r}
+groupA <- df$gene_exprs [df$group=="groupA"]
+groupB <- df$gene_exprs [df$group=="groupB"]
+t.test(groupA, groupB)
+```
+
+
 
 # Exercise
 
@@ -634,16 +654,33 @@ test each gene (i.e., row) in the matrix for differential expression between the
 Start by importing the `logcounts` table and converting it to a matrix.
 
 ```{r}
-logcounts_matrix <- read_excel(   )
+logcounts_matrix <- read_excel( "GSE111543.xlsx" , sheet = "logcounts" )
 
+logcounts_matrix
 
 dim(logcounts_matrix)
 ```
+## matrix
+```{r}
+logcounts_matrix <- as.data.frame(logcounts_matrix)
+logcounts_matrix <- column_to_rownames(logcounts_matrix, var = "gene")
+logcounts_matrix
+```
+## matrix
+```{r}
+logcounts_matrix <- as.matrix(logcounts_matrix)
+```
+
 
 ```{r}
-cell_info <- read_excel(   )
-# all(rownames(cell_info$Sample) == colnames(logcounts_matrix))
+cell_info <- read_excel(  "GSE111543.xlsx", sheet = "cell_info")
+all(rownames(cell_info$Sample) == colnames(logcounts_matrix))
 head(cell_info)
+```
+
+```{r}
+print(logcounts_matrix)
+is.matrix(logcounts_matrix)
 ```
 
 ### Approach
@@ -652,39 +689,52 @@ head(cell_info)
 
 ```{r}
 gene_index <- 1
+names_infected <- cell_info$Sample[cell_info$Infection == "STM-LT2"]
+gene_1_infected <- logcounts_matrix2[gene_index,names_infected]
 
+names_un_infected <- cell_info$Sample[cell_info$Infection != "STM-LT2"]
+gene_1_uninfected <- logcounts_matrix2[gene_index,names_un_infected]
 
-
-
-out <- t.test(   )
+out <- t.test(gene_1_infected, gene_1_uninfected)
 out$p.value
 ```
 
 2. Write a function that generalises the code to test any one gene and return the p-value.
 
 ```{r}
-t_test_row <- function(index,    ) {
+t_test_row <- function(index, matrix, metadata) {
 
+names_infected <- metadata$Sample[metadata$Infection == "STM-LT2"]
+gene_1_infected <- matrix[index,names_infected]
 
+names_un_infected <- metadata$Sample[metadata$Infection != "STM-LT2"]
+gene_1_uninfected <- matrix[index,names_un_infected]
 
+out <- t.test(gene_1_infected, gene_1_uninfected)
 
-
-
+return(out$p.value)
 }
-t_test_row(index = 1,    )
+
+print(t_test_row(index = 1, logcounts_matrix, cell_info )   )
+print(t_test_row(index = 2, logcounts_matrix, cell_info )   )
+print(t_test_row(index = 3, logcounts_matrix, cell_info )   )
+print(t_test_row(index = 40, logcounts_matrix, cell_info )   )
 ```
 
 3. Use the function `vapply` to test every row in the matrix and collect a vector of p-values.
 
 ```{r}
 t_test_pvalues <- vapply(
-  X =    ,
-  FUN =     ,
-  FUN.VALUE =     ,
+  X = 1:nrow(logcounts_matrix)   ,
+  FUN = t_test_row,
+  FUN.VALUE =  0,
+  matrix = logcounts_matrix,
+  metadata = cell_info
 
 )
 
-head(t_test_pvalues)
+head(t_test_pvalues, n=10)
+
 ```
 
 ### Bonus points
@@ -692,24 +742,34 @@ head(t_test_pvalues)
 - Visualise a histogram of the p-values.
 
 ```{r}
-
+hist(t_test_pvalues)
 ```
 
 - Correct p-values for multiple testing.
   How many genes remain before and after multiple testing?
 
 ```{r}
-result_bh <- 
+result_bh <- p.adjust(t_test_pvalues,method = "BH")
+hist(result_bh)
 
+table(result_bh < 0.05)
 ```
 
 - Use `gene_info` to get the gene name for the gene identifier with the smallest p-value.
 
 ```{r}
-gene_table <- read_excel(    )
+gene_table <- read_excel("GSE111543.xlsx", sheet = "gene_info")
+gene_table
 
 
 ```
+
+## differentially expressed genes
+```{r}
+which.min(result_bh)
+row.names(logcounts_matrix)[which.min(result_bh)]
+gene_table$gene_name[gene_table$gene_id==row.names(logcounts_matrix)[which.min(result_bh)]]
+ ```
 
 # Exercise
 
